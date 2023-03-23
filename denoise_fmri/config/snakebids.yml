@@ -1,18 +1,18 @@
+---
 search_terms: {}
- 
-bids_dir: 'path_to_bids_dir'
-output_dir: 'path_to_output_dir'
+bids_dir: path_to_bids_dir
+output_dir: path_to_output_dir
 
-derivatives: True  
-  #can alternatively have paths to derivatives folders
-    #derivatives:
-   #  - paths_to_any_derivatives_for_inputs_here
-   #  - paths_to_any_derivatives_for_inputs_here
+derivatives: true
+# can alternatively have paths to derivatives folders
+# derivatives:
+#  - paths_to_any_derivatives_for_inputs_here
+#  - paths_to_any_derivatives_for_inputs_here
 
-#mappings from analysis_level to set of target rules or files
+# mappings from analysis_level to set of target rules or files
 
 analysis_levels: &analysis_levels
- - participant
+  - participant
 
 
 targets_by_analysis_level:
@@ -22,11 +22,11 @@ targets_by_analysis_level:
 pybids_inputs:
   preproc_bold:
     filters:
-      suffix: 'bold'
-      desc: 'preproc'
-      extension: '.nii.gz'
-      scope: 'derivatives' #raw, derivatives (or can be pipeline name too!)
-      invalid_filters: 'allow'
+      suffix: bold
+      desc: preproc
+      extension: .nii.gz
+      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      invalid_filters: allow
     wildcards:
       - subject
       - session
@@ -37,12 +37,12 @@ pybids_inputs:
 
   preproc_mask:
     filters:
-      suffix: 'mask'
-      desc: 'brain'
-      extension: '.nii.gz'
-      scope: 'derivatives' #raw, derivatives (or can be pipeline name too!)
-      datatype: 'func'
-      invalid_filters: 'allow'
+      suffix: mask
+      desc: brain
+      extension: .nii.gz
+      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      datatype: func
+      invalid_filters: allow
     wildcards:
       - subject
       - session
@@ -53,11 +53,11 @@ pybids_inputs:
 
   confounds:
     filters:
-      suffix: 'timeseries'
-      desc: 'confounds'
-      extension: '.tsv'
-      scope: 'derivatives' #raw, derivatives (or can be pipeline name too!)
-      invalid_filters: 'allow'
+      suffix: timeseries
+      desc: confounds
+      extension: .tsv
+      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      invalid_filters: allow
     wildcards:
       - subject
       - session
@@ -67,11 +67,11 @@ pybids_inputs:
 
   mixing:
     filters:
-      suffix: 'mixing'
-      desc: 'MELODIC'
-      extension: '.tsv'
-      scope: 'derivatives' #raw, derivatives (or can be pipeline name too!)
-      invalid_filters: 'allow'
+      suffix: mixing
+      desc: MELODIC
+      extension: .tsv
+      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      invalid_filters: allow
     wildcards:
       - subject
       - session
@@ -81,10 +81,10 @@ pybids_inputs:
 
   noiseICs:
     filters:
-      suffix: 'AROMAnoiseICs'
-      extension: '.csv'
-      scope: 'derivatives' #raw, derivatives (or can be pipeline name too!)
-      invalid_filters: 'allow'
+      suffix: AROMAnoiseICs
+      extension: .csv
+      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      invalid_filters: allow
     wildcards:
       - subject
       - session
@@ -92,11 +92,12 @@ pybids_inputs:
       - acquisition
       - run
 
-#enable printing debug statements during parsing -- disable if generating dag visualization
-debug: False
+# enable printing debug statements during parsing -- disable if generating dag
+# visualization
+debug: false
 
 singularity:
-  fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.4_cuda9.1.sif' 
+  fsl: /project/6050199/akhanf/singularity/bids-apps/fsl_6.0.4_cuda9.1.sif
 
 confounds: &confounds
   - name: csf_wm_motion
@@ -269,58 +270,52 @@ confounds: &confounds
       - std_dvars
 
 
-   
-
-#these are the command-line parameters
+# these are the command-line parameters
 parse_args:
 
   bids_dir:
-    help: The directory with the input dataset formatted according 
-          to the BIDS standard.
+    help: The directory with the input dataset formatted according to the BIDS standard.
 
   output_dir:
-    help: The directory where the output files 
-          should be stored. If you are running group level analysis
-          this folder should be prepopulated with the results of the
-          participant level analysis.
+    help: The directory where the output files should be stored. If you are running
+      group level analysis this folder should be prepopulated with the results of
+      the participant level analysis.
 
-  analysis_level: 
-    help: Level of the analysis that will be performed. 
+  analysis_level:
+    help: Level of the analysis that will be performed.
     choices: *analysis_levels
 
   --participant_label:
-    help: The label(s) of the participant(s) that should be analyzed. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
+    help: The label(s) of the participant(s) that should be analyzed. The label corresponds
+      to sub-<participant_label> from the BIDS spec (so it does not include "sub-").
+      If this parameter is not provided all subjects should be analyzed. Multiple
+      participants can be specified with a space separated list.
+    nargs: +
 
   --exclude_participant_label:
-    help: The label(s) of the participant(s) that should be excluded. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
+    help: The label(s) of the participant(s) that should be excluded. The label corresponds
+      to sub-<participant_label> from the BIDS spec (so it does not include "sub-").
+      If this parameter is not provided all subjects should be analyzed. Multiple
+      participants can be specified with a space separated list.
+    nargs: +
 
-  #end of required snakebids args
+  # end of required snakebids args
 
   --confounds_config:
     help: 'Config defining groups of confounds to use for denoising (default: %(default)s)'
-    nargs: '+'
+    nargs: +
     default: *confounds
-#config/confounds.yml'
 
   --fwhm:
-    help: 'Smoothing levels to apply after denoising (fwhm in mm), for 0 will not smooth, but will simply remove non-finite values (default: %(default)s)'
-    default: 
+    help: 'Smoothing levels to apply after denoising (fwhm in mm), for 0 will not
+      smooth, but will simply remove non-finite values (default: %(default)s)'
+    default:
       - 0
       - 5
       - 10
-    nargs: '+'
+    nargs: +
 
   --derivatives:
-    help: 'Path to the derivatives folder that contains the fmriprep dataset, default will look under the derivatives subfolder of bids dataset (default: %(default)s) '
-    default: True
-
+    help: 'Path to the derivatives folder that contains the fmriprep dataset, default
+      will look under the derivatives subfolder of bids dataset (default: %(default)s) '
+    default: true
