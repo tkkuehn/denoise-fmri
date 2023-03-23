@@ -60,6 +60,7 @@ rule all:
 rule smooth:
     input:
         nii=inputs["preproc_bold"].path,
+        json=re.sub(".nii.gz", ".json", inputs["preproc_bold"].path),
     params:
         fwhm=lambda wildcards: float(wildcards.fwhm),
     output:
@@ -93,6 +94,14 @@ rule denoise:
             desc="smoothed",
             fwhm="{fwhm}",
             suffix="bold.nii.gz",
+            **inputs["preproc_bold"].wildcards
+        ),
+        json=bids(
+            root="results",
+            datatype="func",
+            desc="smoothed",
+            fwhm="{fwhm}",
+            suffix="bold.json",
             **inputs["preproc_bold"].wildcards
         ),
         confounds_tsv=inputs["confounds"].path,

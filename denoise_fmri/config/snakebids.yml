@@ -28,6 +28,7 @@ pybids_inputs:
       # scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       # invalid_filters: allow
       datatype: func
+      run: False
     wildcards:
       - subject
       - session
@@ -44,6 +45,7 @@ pybids_inputs:
       #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       datatype: func
       invalid_filters: allow
+      run: False
     wildcards:
       - subject
       - session
@@ -54,11 +56,12 @@ pybids_inputs:
 
   confounds:
     filters:
-      suffix: regressors 
+      suffix: timeseries 
       desc: confounds
       extension: .tsv
       #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       invalid_filters: allow
+      run: False
     wildcards:
       - subject
       - session
