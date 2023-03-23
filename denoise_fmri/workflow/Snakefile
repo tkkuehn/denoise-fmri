@@ -11,7 +11,8 @@ configfile: "config/snakebids.yml"
 inputs = snakebids.generate_inputs(
     bids_dir=config["bids_dir"],
     pybids_inputs=config["pybids_inputs"],
-    derivatives=config["derivatives"],
+    pybids_config=["bids", "derivatives"],
+    # derivatives=config["derivatives"],
     participant_label=config["participant_label"],
     exclude_participant_label=config["exclude_participant_label"],
     use_bids_inputs=True,
@@ -48,7 +49,7 @@ rule all:
                     **inputs["preproc_bold"].wildcards
                 ),
                 zip,
-                **config["preproc_bold"].zip_lists
+                **inputs["preproc_bold"].zip_lists
             ),
             fwhm=config["fwhm"],
             confounds_idx=range(1, len(config["confounds"]) + 1),
@@ -59,7 +60,6 @@ rule all:
 rule smooth:
     input:
         nii=inputs["preproc_bold"].path,
-        json=re.sub(".nii.gz", ".json", inputs["preproc_bold"].path),
     params:
         fwhm=lambda wildcards: float(wildcards.fwhm),
     output:
@@ -95,103 +95,6 @@ rule denoise:
             suffix="bold.nii.gz",
             **inputs["preproc_bold"].wildcards
         ),
-        json=bids(
-            root="results",
-            datatype="func",
-            desc="smoothed",
-            fwhm="{fwhm}",
-            suffix="bold.json",
-            **inputs["preproc_bold"].wildcards
-        ),
-        confounds_tsv=config["input_path"]["confounds"],
-        mask_nii=config["input_path"]["preproc_mask"],
-    params:
-        confounds_to_use=lambda wildcards: inputs["confounds"][
-            int(wildcards.confounds_idx) - 1
-        ]["regressors"],
-        confounds_name=lambda wildcards: config["confounds"][
-            int(wildcards.confounds_idx) - 1
-        ]["name"],
-        standardize=True,
-        detrend=True,
-        low_pass=False,
-        high_pass=False,
-    output:
-        nii=bids(
-            root="results",
-            datatype="func",
-            desc="denoised",
-            fwhm="{fwhm}",
-            confounds="{confounds_idx}",
-            suffix="bold.nii.gz",
-            **inputs["preproc_bold"].wildcards
-        ),
-        json=bids(
-            root="results",
-            datatype="func",
-            desc="denoised",
-            fwhm="{fwhm}",
-            confounds="{confounds_idx}",
-            suffix="bold.json",
-            **config["preproc_bold"].wildcards
-        ),
-    group:
-        "subj"
-    script:
-        "scripts/denoise.py"
-
-
-rule aroma_nonaggr:
-    input:
-        nii=bids(
-            root="results",
-            datatype="func",
-            desc="smoothed",
-            fwhm="{fwhm}",
-            suffix="bold.nii.gz",
-            **inputs["preproc_bold"].wildcards
-        ),
-        mixing=inputs["mixing"].path,
-        noiseICs=inputs["noiseICs"].path,
-        mask_nii=inputs["preproc_mask"].path,
-    params:
-        container=config["singularity"]["fsl"],
-    output:
-        nii=bids(
-            root="results",
-            datatype="func",
-            desc="AROMAnonaggr",
-            fwhm="{fwhm}",
-            suffix="bold.nii.gz",
-            **inputs["preproc_bold"].wildcards
-        ),
-    container:
-        config["singularity"]["fsl"]
-    group:
-        "subj"
-    shell:
-        "fsl_regfilt -i {input.nii} -f `cat {input.noiseICs}` -d {input.mixing} -o {output.nii} -m {input.mask_nii}"
-
-
-# this regresses out confounds after aroma
-rule aroma_aggr:
-    input:
-        nii=bids(
-            root="results",
-            datatype="func",
-            desc="AROMAnonaggr",
-            fwhm="{fwhm}",
-            suffix="bold.nii.gz",
-            **inputs["preproc_bold"].wildcards
-        ),
-        json=bids(
-            root="results",
-            datatype="func",
-            desc="smoothed",
-            fwhm="{fwhm}",
-            suffix="bold.json",
-            **inputs["preproc_bold"].wildcards
-        ),
         confounds_tsv=inputs["confounds"].path,
         mask_nii=inputs["preproc_mask"].path,
     params:
@@ -209,7 +112,7 @@ rule aroma_aggr:
         nii=bids(
             root="results",
             datatype="func",
-            desc="AROMAdenoised",
+            desc="denoised",
             fwhm="{fwhm}",
             confounds="{confounds_idx}",
             suffix="bold.nii.gz",
@@ -218,7 +121,7 @@ rule aroma_aggr:
         json=bids(
             root="results",
             datatype="func",
-            desc="AROMAdenoised",
+            desc="denoised",
             fwhm="{fwhm}",
             confounds="{confounds_idx}",
             suffix="bold.json",
@@ -228,3 +131,19 @@ rule aroma_aggr:
         "subj"
     script:
         "scripts/denoise.py"
+
+
+rule just_denoise:
+    input:
+        denoised=expand(
+            expand(
+                rules.denoise.output.nii,
+                zip,
+                **inputs["preproc_bold"].zip_lists,
+                allow_missing=True
+            ),
+            fwhm=config["fwhm"],
+            confounds_idx=range(1, len(config["confounds"]) + 1)
+        ),
+    default_target: True
+

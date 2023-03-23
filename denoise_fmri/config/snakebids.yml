@@ -3,7 +3,7 @@ search_terms: {}
 bids_dir: path_to_bids_dir
 output_dir: path_to_output_dir
 
-derivatives: true
+derivatives: false
 # can alternatively have paths to derivatives folders
 # derivatives:
 #  - paths_to_any_derivatives_for_inputs_here
@@ -25,8 +25,9 @@ pybids_inputs:
       suffix: bold
       desc: preproc
       extension: .nii.gz
-      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
-      invalid_filters: allow
+      # scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      # invalid_filters: allow
+      datatype: func
     wildcards:
       - subject
       - session
@@ -40,7 +41,7 @@ pybids_inputs:
       suffix: mask
       desc: brain
       extension: .nii.gz
-      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       datatype: func
       invalid_filters: allow
     wildcards:
@@ -53,10 +54,10 @@ pybids_inputs:
 
   confounds:
     filters:
-      suffix: timeseries
+      suffix: regressors 
       desc: confounds
       extension: .tsv
-      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       invalid_filters: allow
     wildcards:
       - subject
@@ -70,7 +71,7 @@ pybids_inputs:
       suffix: mixing
       desc: MELODIC
       extension: .tsv
-      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       invalid_filters: allow
     wildcards:
       - subject
@@ -83,7 +84,7 @@ pybids_inputs:
     filters:
       suffix: AROMAnoiseICs
       extension: .csv
-      scope: derivatives    # raw, derivatives (or can be pipeline name too!)
+      #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
       invalid_filters: allow
     wildcards:
       - subject
