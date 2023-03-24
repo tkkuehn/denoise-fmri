@@ -69,33 +69,6 @@ pybids_inputs:
       - acquisition
       - run
 
-  mixing:
-    filters:
-      suffix: mixing
-      desc: MELODIC
-      extension: .tsv
-      #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
-      invalid_filters: allow
-    wildcards:
-      - subject
-      - session
-      - task
-      - acquisition
-      - run
-
-  noiseICs:
-    filters:
-      suffix: AROMAnoiseICs
-      extension: .csv
-      #scope: derivatives    # raw, derivatives (or can be pipeline name too!)
-      invalid_filters: allow
-    wildcards:
-      - subject
-      - session
-      - task
-      - acquisition
-      - run
-
 # enable printing debug statements during parsing -- disable if generating dag
 # visualization
 debug: false
